@@ -71,6 +71,19 @@ Follow these steps to set up the project on your local machine:
 
 ---
 
+## Credentials
+
+You can use the following credentials to log in as different user roles:
+
+| Role      | Email                      | Password |
+|-----------|----------------------------|----------|
+| Admin     | admin@gmail.com            | 123456   |
+| Customer  | customer@gmail.com         | 123456   |
+| Vendor 1  | vendor1@gmail.com          | 123456   |
+| Vendor 2  | vendor2@gmail.com          | 123456   |
+
+---
+
 ## About the Project
 
 - The UI is intentionally kept basic for now, focusing on core functionality.
