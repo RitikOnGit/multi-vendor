@@ -1,6 +1,6 @@
 @extends('admin.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Products')
 
 @section('content')
     <div class="">

@@ -26,7 +26,7 @@ class CheckoutController extends Controller
 
         $orders = $this->checkout->checkout($shipping, 'cod');
 
-        return redirect()->route('orders.thankyou')->with('orders', $orders->pluck('id')->toArray());
+        return redirect()->route('pages.thank-you')->with('orders', $orders->pluck('id')->toArray());
     }
 
     // Vendor-specific checkout
@@ -44,6 +44,6 @@ class CheckoutController extends Controller
 
         $orders = $this->checkout->checkoutOnlyVendor($request->vendor_id, $shipping, 'cod');
 
-        return redirect()->route('orders.thankyou')->with('orders', $orders->pluck('id')->toArray());
+        return redirect()->route('pages.thank-you')->with('orders', $orders->pluck('id')->toArray());
     }
 }

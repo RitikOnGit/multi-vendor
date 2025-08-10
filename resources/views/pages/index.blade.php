@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Product Page')
+@section('title', 'Home ')
 
 @section('content')
     <!-- Products Grid -->
