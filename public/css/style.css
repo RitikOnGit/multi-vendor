@@ -50,6 +50,26 @@
       color: #343a40;
     }
 
+    .cart-button{
+        margin: 40px 10px 20px;
+        display: flex;
+    }
+    .cart-button button{
+        margin: 10px auto;
+        background-color: black;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+    }
+    .cart-button button:hover{
+        background-color: rgb(21, 21, 21);
+        transform: scale(1.05);
+        transition: transform 0.3s;
+    }
+
     .cart-icon {
       font-size: 22px;
       cursor: pointer;

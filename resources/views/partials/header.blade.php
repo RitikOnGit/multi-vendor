@@ -1,6 +1,7 @@
 <div class="navbar">
     <div class="navbar-left">
-        <h1>MyShop</h1>
+        <h1><a href="{{ route('home') }}" style="color: white;
+    text-decoration: none;">MyShop</a></h1>
     </div>
     <div class="navbar-right">
         @auth

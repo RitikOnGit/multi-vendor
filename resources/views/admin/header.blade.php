@@ -17,7 +17,7 @@
         <div class="data-scrollbar" data-scroll="1">
             <nav class="iq-sidebar-menu">
                 <ul id="iq-sidebar-toggle" class="iq-menu">
-                    <li class="active">
+                    <li class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         <a href="{{ route('dashboard') }}" class="svg-icon">
                             <svg class="svg-icon" width="25" height="25" xmlns="http://www.w3.org/2000/svg"
                                 viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -40,9 +40,11 @@
                                 <span class="ml-4">Sellers</span>
                             </a>
                         </li>
-                    @else
-                        <li class="">
-                            <a href="page-project.html" class="svg-icon">
+
+                    @elseif(Auth::user() && Auth::user()->role === 'vendor')
+
+                        <li class="{{ request()->routeIs('vendor.products') ? 'active' : '' }}">
+                            <a href="{{ route('vendor.products') }}" class="svg-icon">
                                 <svg class="svg-icon" width="25" height="25" xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">

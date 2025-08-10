@@ -140,6 +140,11 @@ form[action="{{ route('checkout') }}"] button:hover {
                 </tbody>
             </table>
             <p>Vendor total: {{ $group->total }}</p>
+            <form action="{{ route('checkout.vendor') }}" method="POST">
+            @csrf
+            <input type="hidden" name="vendor_id" value="{{ $group->vendor->id }}">
+            <button type="submit">Checkout This Vendor</button>
+        </form>
         </div>
     @endforeach
 

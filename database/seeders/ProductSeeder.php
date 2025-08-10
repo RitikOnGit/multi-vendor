@@ -20,7 +20,7 @@ class ProductSeeder extends Seeder
             'name' => 'Product 1 by ' . $vendor->user->name,
             'price' => 100 + rand(5, 10),
             'stock' => 10 + rand(5, 10),
-            'image' => 'products/product1.jpg',
+            'image' => 'products/product-1.png',
             'vendor_id' => $vendor->id,
         ]);
 
@@ -28,7 +28,7 @@ class ProductSeeder extends Seeder
             'name' => 'Product 2 by ' . $vendor->user->name,
             'price' => 150 + rand(5, 10),
             'stock' => 15 + rand(5, 10),
-            'image' => 'products/product2.jpg',
+            'image' => 'products/product-2.png',
             'vendor_id' => $vendor->id,
         ]);
     }
