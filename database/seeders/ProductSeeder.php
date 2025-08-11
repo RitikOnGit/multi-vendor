@@ -31,6 +31,14 @@ class ProductSeeder extends Seeder
             'image' => 'products/product-2.png',
             'vendor_id' => $vendor->id,
         ]);
+
+        Product::create([
+            'name' => 'Product 3 by ' . $vendor->user->name,
+            'price' => 100 + rand(5, 10),
+            'stock' => 20 + rand(5, 10),
+            'image' => 'products/product-3.png',
+            'vendor_id' => $vendor->id,
+        ]);
     }
     }
 }

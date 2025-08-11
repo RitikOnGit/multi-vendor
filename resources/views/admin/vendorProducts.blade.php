@@ -22,7 +22,7 @@
                     </div>
                     @foreach ($products as $product)
 
-                        <div class="col-lg-6">
+                        <div class="col-lg-12">
                             <div class="card">
                                 <div class="card-body">
                                     <div class="row">
@@ -30,16 +30,23 @@
                                             <div class="card card-widget task-card">
                                                 <div class="card-body">
                                                     <div class="d-flex flex-wrap align-items-center justify-content-between">
-                                                        <img src="{{ asset('storage/' . $product->image) }}" alt="" style="width: 150px;">
-                                                        <div class="d-flex align-items-center" style="gap: 20px;">
-
-                                                            <h5 class="mb-2">{{ $product->name }}</h5>
+                                                        <div class="col-3">
+                                                            <img src="{{ asset('storage/' . $product->image) }}" alt="" style="width: 150px;">
                                                         </div>
-                                                        <div class="media align-items-center mt-md-0 mt-3">
-                                                            <a class="btn bg-secondary-light" data-toggle="collapse"
-                                                                href="#collapseEdit1" role="button" aria-expanded="false"
-                                                                aria-controls="collapseEdit1"><i
-                                                                    class="ri-edit-box-line m-0"></i></a>
+                                                        <div class="col-8 " style="gap: 20px;">
+                                                            <h5 class="mb-2"><strong>Title:</strong> {{ $product->name }}</h5>
+                                                            <p class="mb-2"><strong>Description:</strong> {{ $product->description }}</p>
+                                                            <div class="d-flex" style="gap: 20px;">
+                                                                <p><strong>Stock:</strong> {{ $product->stock }}</p>
+                                                                <p><strong>Price:</strong> {{ $product->price }}</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-1">
+                                                            <div class="media align-items-center mt-md-0 mt-3">
+                                                                <a href="{{ route('vendor.products.edit', $product->id) }}" class="btn bg-secondary-light">
+                                                                    <i class="ri-edit-box-line m-0"></i>
+                                                                </a>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 </div>

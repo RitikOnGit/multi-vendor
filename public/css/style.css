@@ -11,7 +11,7 @@
 
     /* Navbar */
     .navbar {
-      background-color: #343a40;
+      background-color: #2a1c11;
       padding: 1rem 2rem;
       display: flex;
       justify-content: space-between;
@@ -50,13 +50,90 @@
       color: #343a40;
     }
 
+    /* Hero Section */
+.hero {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero .hero-image {
+    padding: 25px;
+    background: #d4c5b5;
+    background-blend-mode: color;
+}
+
+.hero .hero-image img {
+    width: 100%;
+    height: auto;
+    /* Maintain aspect ratio */
+    display: block;
+}
+
+.hero .hero-content {
+    position: absolute;
+    /* top: 0; */
+    left: 13%;
+    bottom: 12%;
+    /* right: 0; */
+    padding: 20px 50px;
+    /* Adjust padding as needed */
+    text-align: center;
+    color: #fff;
+    /* Text color for better visibility */
+    z-index: 1;
+}
+
+.hero h1 {
+    font-weight: 500;
+    font-size: 44px;
+    margin-bottom: 20px;
+}
+.hero button {
+    padding: 14px 24px;
+    background-color: #F37833;
+    color: #000;
+    letter-spacing: 1px;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    float: left;
+}
+
+.hero .hero-image2 {
+    padding: 0;
+}
+
+.hero .hero-image img {
+    width: 100%;
+    height: auto;
+    /* Maintain aspect ratio */
+    display: block;
+}
+
+.hero .hero-content2 {
+    position: absolute;
+    left: 0%;
+    bottom: 2%;
+    padding: 20px 50px;
+    color: #fff;
+    z-index: 1;
+}
+.hero-content2 h1{
+    margin-bottom: 10px;
+}
+.hero button.btn-2 {
+    padding: 8px 20px;
+    letter-spacing: 0.1px;
+    font-size: 14px;
+}
+
     .cart-button{
         margin: 40px 10px 20px;
         display: flex;
     }
     .cart-button button{
         margin: 10px auto;
-        background-color: black;
+        background-color: #834623;
         color: white;
         border: none;
         padding: 10px 20px;
@@ -65,7 +142,7 @@
         transition: background 0.3s;
     }
     .cart-button button:hover{
-        background-color: rgb(21, 21, 21);
+        background-color: #2a1c11;
         transform: scale(1.05);
         transition: transform 0.3s;
     }
@@ -97,6 +174,7 @@
 
     .product {
       background: white;
+      background: #FAF8F6;
       padding: 1rem;
       border-radius: 12px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
@@ -111,7 +189,7 @@
 
     .product img {
       width: 100%;
-      height: 180px;
+      height: 200px;
       object-fit: cover;
       border-radius: 10px;
     }
@@ -128,7 +206,7 @@
 
     .product button {
       padding: 8px 16px;
-      background: #007bff;
+      background-color: #834623;
       color: white;
       border: none;
       border-radius: 5px;
@@ -137,7 +215,7 @@
     }
 
     .product button:hover {
-      background: #0056b3;
+      background: #2a1c11;
     }
 
     /* Cart Sidebar */

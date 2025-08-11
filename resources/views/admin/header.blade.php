@@ -40,6 +40,19 @@
                                 <span class="ml-4">Vendors</span>
                             </a>
                         </li>
+                        <li class="{{ request()->routeIs('admin.products') ? 'active' : '' }}">
+                            <a href="{{ route('admin.products') }}" class="svg-icon">
+                                <svg class="svg-icon" width="25" height="25" xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2">
+                                    </path>
+                                    <rect x="6" y="14" width="12" height="8"></rect>
+                                </svg>
+                                <span class="ml-4">Products</span>
+                            </a>
+                        </li>
 
                     @elseif(Auth::user() && Auth::user()->role === 'vendor')
 
@@ -98,14 +111,6 @@
                     </button>
                     <div class="collapse navbar-collapse" id="navbarSupportedContent">
                         <ul class="navbar-nav ml-auto navbar-list align-items-center">
-                            <li>
-                                <div class="iq-search-bar device-search">
-                                    <form action="#" class="searchbox">
-                                        <a class="search-link" href="#"><i class="ri-search-line"></i></a>
-                                        <input type="text" class="text search-input" placeholder="Search here...">
-                                    </form>
-                                </div>
-                            </li>
                             <li class="nav-item nav-icon search-content">
                                 <a href="#" class="search-toggle rounded" id="dropdownSearch" data-toggle="dropdown"
                                     aria-haspopup="true" aria-expanded="false">

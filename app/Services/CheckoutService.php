@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Services;
 
 use App\Models\Order;
@@ -13,170 +14,114 @@ use App\Events\OrderPlaced;
 class CheckoutService
 {
     /**
-     * Accepts: $user (auth user), $shipping (array), $paymentMethod (string)
-     * Returns: collection of created orders
+     * Full cart checkout
      */
     public function checkout(array $shipping, string $paymentMethod = 'cod')
-{
-    $user = Auth::user() ?? null;
-    if (!$user) {
-        throw new \RuntimeException('User must be authenticated for checkout.');
+    {
+        return $this->processCheckout(null, $shipping, $paymentMethod);
     }
 
-    $cartService = new \App\Services\CartService();
-    $groups = $cartService->getGroupedCart();
-
-    if ($groups->isEmpty()) {
-        throw new \RuntimeException('Cart is empty.');
+    /**
+     * Vendor specific checkout
+     */
+    public function checkoutOnlyVendor(int $vendorId, array $shipping, string $paymentMethod = 'cod')
+    {
+        return $this->processCheckout($vendorId, $shipping, $paymentMethod);
     }
 
-    $createdOrders = collect();
+    /**
+     * Common checkout processor
+     */
+    private function processCheckout(?int $vendorId, array $shipping, string $paymentMethod)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            throw new \RuntimeException('User must be authenticated for checkout.');
+        }
 
-    DB::beginTransaction();
-    try {
-        foreach ($groups as $group) {
-            $vendor = $group->vendor;
-            $items = $group->items;
+        $cartService = new \App\Services\CartService();
+        $groups = $cartService->getGroupedCart();
 
-            $orderTotal = $items->sum('subtotal');
+        // Vendor filter if needed
+        if ($vendorId) {
+            $groups = $groups->filter(fn($g) => $g->vendor->id === $vendorId);
+        }
 
-            // Order create
-            $order = Order::create([
-                'user_id' => $user->id,
-                'total_amount' => $orderTotal,
-                'status' => 'pending',
-                'payment_status' => $paymentMethod === 'cod' ? 'pending' : 'paid',
-                'shipping_address' => json_encode($shipping), // array ko json me store karo
-            ]);
+        if ($groups->isEmpty()) {
+            throw new \RuntimeException('Cart is empty.');
+        }
 
-            foreach ($items as $it) {
-                $product = Product::lockForUpdate()->find($it->product->id);
-                if (!$product) throw new \RuntimeException('Product not found: ' . $it->product->id);
-                if ($it->quantity > $product->stock) {
-                    throw new \RuntimeException("Insufficient stock for product: {$product->name}");
+        $createdOrders = collect();
+
+        DB::beginTransaction();
+        try {
+            foreach ($groups as $group) {
+                $vendor = $group->vendor;
+                $items = $group->items;
+                $orderTotal = $items->sum('subtotal');
+
+                // Create order
+                $order = Order::create([
+                    'user_id'         => $user->id,
+                    'total_amount'    => $orderTotal,
+                    'status'          => 'pending',
+                    'payment_status'  => $paymentMethod === 'cod' ? 'pending' : 'pending',
+                    'shipping_address'=> json_encode($shipping),
+                ]);
+
+                foreach ($items as $it) {
+                    $product = Product::lockForUpdate()->find($it->product->id);
+                    if (!$product) {
+                        throw new \RuntimeException('Product not found: ' . $it->product->id);
+                    }
+                    if ($it->quantity > $product->stock) {
+                        throw new \RuntimeException("Insufficient stock for product: {$product->name}");
+                    }
+
+                    $product->decrement('stock', $it->quantity);
+
+                    OrderItem::create([
+                        'order_id'  => $order->id,
+                        'product_id'=> $product->id,
+                        'vendor_id' => $product->vendor_id,
+                        'quantity'  => $it->quantity,
+                        'price'     => $product->price,
+                        'subtotal'  => $product->price * $it->quantity,
+                    ]);
                 }
 
-                $product->decrement('stock', $it->quantity);
-
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $product->id,
-                    'vendor_id' => $product->vendor_id, // yahan product se vendor_id lo
-                    'quantity' => $it->quantity,
-                    'price' => $product->price,
-                    'subtotal' => $product->price * $it->quantity,
+                Payment::create([
+                    'order_id'       => $order->id,
+                    'payment_method' => $paymentMethod,
+                    'status'         => $paymentMethod === 'cod' ? 'pending' : 'pending',
+                    'amount'         => $orderTotal,
+                    'response'       => null,
                 ]);
+
+                $createdOrders->push($order);
+
+                event(new OrderPlaced($order));
             }
 
-            Payment::create([
-                'order_id' => $order->id,
-                'payment_method' => $paymentMethod,
-                'status' => $paymentMethod === 'cod' ? 'pending' : 'paid',
-                'amount' => $orderTotal,
-                'response' => null,
-            ]);
-
-            $createdOrders->push($order);
-
-            event(new OrderPlaced($order));
-        }
-
-        // Cart clear
-        Cart::where('user_id', $user->id)->delete();
-
-        DB::commit();
-        return $createdOrders;
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        throw $e;
-    }
-}
-
-
-    public function checkoutOnlyVendor(int $vendorId, array $shipping, string $paymentMethod = 'cod')
-{
-    $user = Auth::user() ?? null;
-    if (!$user) {
-        throw new \RuntimeException('User must be authenticated for checkout.');
-    }
-
-    $cartService = new \App\Services\CartService();
-    $groups = $cartService->getGroupedCart();
-
-    // Sirf us vendor ka group filter karo
-    $vendorGroup = $groups->firstWhere('vendor.id', $vendorId);
-    if (!$vendorGroup) {
-        throw new \RuntimeException('No cart items found for this vendor.');
-    }
-
-    $createdOrders = collect();
-
-    DB::beginTransaction();
-    try {
-        $vendor = $vendorGroup->vendor;
-        $items = $vendorGroup->items;
-
-        $orderTotal = $items->sum('subtotal');
-
-        // Create order
-        $order = Order::create([
-            'user_id' => $user->id,
-            'total_amount' => $orderTotal,
-            'status' => 'pending',
-            'payment_status' => $paymentMethod === 'cod' ? 'pending' : 'pending',
-            'shipping_address' => $shipping,
-        ]);
-
-        foreach ($items as $it) {
-            $product = Product::lockForUpdate()->find($it->product->id);
-            if (!$product) throw new \RuntimeException('Product not found: '.$it->product->id);
-            if ($it->quantity > $product->stock) {
-                throw new \RuntimeException("Insufficient stock for product: {$product->name}");
+            // Clear cart
+            if ($vendorId) {
+                // Remove only vendor-specific items
+                $cart = Cart::where('user_id', $user->id)->first();
+                if ($cart) {
+                    $cart->items()->whereHas('product', function ($q) use ($vendorId) {
+                        $q->where('vendor_id', $vendorId);
+                    })->delete();
+                }
+            } else {
+                // Remove all items
+                Cart::where('user_id', $user->id)->delete();
             }
 
-            // Stock decrement
-            $product->decrement('stock', $it->quantity);
-
-            // Order Item create - vendor_id from product
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $product->id,
-                'vendor_id' => $product->vendor_id, // <- yahan se vendor id li
-                'quantity' => $it->quantity,
-                'price' => $product->price,
-                'subtotal' => $product->price * $it->quantity,
-            ]);
+            DB::commit();
+            return $createdOrders;
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
         }
-
-        // Payment record
-        Payment::create([
-            'order_id' => $order->id,
-            'payment_method' => $paymentMethod,
-            'status' => $paymentMethod === 'cod' ? 'pending' : 'paid',
-            'amount' => $orderTotal,
-            'response' => null,
-        ]);
-
-        $createdOrders->push($order);
-
-        event(new OrderPlaced($order));
-
-        // Sirf is vendor ke cart items remove karo (product->vendor_id check karke)
-        $cart = \App\Models\Cart::where('user_id', $user->id)->first();
-        if ($cart) {
-            $cart->items()->whereHas('product', function ($q) use ($vendorId) {
-                $q->where('vendor_id', $vendorId);
-            })->delete();
-        }
-
-        DB::commit();
-        return $createdOrders;
-
-    } catch (\Throwable $e) {
-        DB::rollBack();
-        throw $e;
     }
-}
-
-
 }

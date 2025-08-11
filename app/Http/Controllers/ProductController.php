@@ -38,5 +38,42 @@ class ProductController extends Controller
         Product::create($data);
         return redirect()->back()->with('success', 'Product added successfully!');
     }
+    public function editPage(Product $product)
+{
+    if ($product->vendor_id !== auth()->user()->vendorProfile->id) {
+        abort(403, 'Unauthorized');
+    }
+
+    return view('admin.vendorProductEdit', compact('product'));
+}
+
+
+    public function update(Request $request, Product $product)
+{
+    if ($product->vendor_id !== auth()->user()->vendorProfile->id) {
+        abort(403, 'Unauthorized action.');
+    }
+
+    $data = $request->validate([
+        'name' => 'required|string',
+        'description' => 'nullable|string',
+        'price' => 'required|numeric|min:0',
+        'stock' => 'required|integer|min:0',
+        'image' => 'nullable|image'
+    ]);
+
+    if ($request->hasFile('image')) {
+        if ($product->image) {
+            \Storage::disk('public')->delete($product->image);
+        }
+
+        $data['image'] = $request->file('image')->store('products', 'public');
+    }
+
+    $product->update($data);
+
+    return redirect()->back()->with('success', 'Product updated successfully!');
+}
+
 
 }

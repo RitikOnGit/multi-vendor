@@ -9,8 +9,8 @@
     <script>
         // Redirect after 5 seconds
         setTimeout(function() {
-            window.location.href = '{{ url("/") }}'; // Redirect to home page
-        }, 5000);
+            window.location.href = '{{ route("myOrders") }}';
+        }, 5500);
     </script>
     <style>
         body {

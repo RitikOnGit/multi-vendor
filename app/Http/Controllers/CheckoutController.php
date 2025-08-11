@@ -15,19 +15,53 @@ class CheckoutController extends Controller
     }
 
     // Full cart checkout
+    // public function checkoutAll(Request $request)
+    // {
+    //     $shipping = [
+    //         'address' => 'User Address Example',
+    //         'city'    => 'Mumbai',
+    //         'pincode' => '400001',
+    //     ];
+
+    //     $orders = $this->checkout->checkout($shipping, 'razorpay');
+    //     return redirect()->route('payment.razorpay.page', $orders->first()->id);
+
+    // }
+
     public function checkoutAll(Request $request)
-    {
-        // Shipping details ka example — tum form se address le sakte ho
-        $shipping = [
-            'address' => 'User Address Example',
-            'city'    => 'Mumbai',
-            'pincode' => '400001',
-        ];
+{
+    $shipping = [
+        'address' => 'User Address Example',
+        'city'    => 'Mumbai',
+        'pincode' => '400001',
+    ];
 
-        $orders = $this->checkout->checkout($shipping, 'cod');
+    $orders = $this->checkout->checkout($shipping, 'razorpay'); // multi-vendor orders
 
-        return redirect()->route('pages.thank-you')->with('orders', $orders->pluck('id')->toArray());
-    }
+    // Combined total
+    $totalAmount = $orders->sum('total_amount');
+
+    // Create Razorpay order
+    $api = new \Razorpay\Api\Api(env('RAZORPAY_KEY'), env('RAZORPAY_SECRET'));
+    $razorpayOrder = $api->order->create([
+        'receipt' => 'multi_vendor_' . now()->timestamp,
+        'amount' => $totalAmount * 100, // in paise
+        'currency' => 'INR',
+    ]);
+
+    // Store in session for later update
+    session()->put('razorpay_multi_orders', $orders->pluck('id')->toArray());
+
+    $order = $orders->first();
+
+        return view('payment.razorpay', [
+            'razorpayOrderId' => $razorpayOrder['id'],
+            'amount' => $totalAmount,
+            'orders' => $orders,
+            'order' => $order,               // <<< add this
+            'razorpayKey' => env('RAZORPAY_KEY'),
+        ]);
+}
 
     // Vendor-specific checkout
     public function checkoutVendor(Request $request)
@@ -42,8 +76,9 @@ class CheckoutController extends Controller
             'pincode' => '400001',
         ];
 
-        $orders = $this->checkout->checkoutOnlyVendor($request->vendor_id, $shipping, 'cod');
+        $orders = $this->checkout->checkoutOnlyVendor($request->vendor_id, $shipping, 'razorpay');
+        session()->put('razorpay_multi_orders', [$orders->first()->id]);
+        return redirect()->route('payment.razorpay.page', $orders->first()->id);
 
-        return redirect()->route('pages.thank-you')->with('orders', $orders->pluck('id')->toArray());
     }
 }

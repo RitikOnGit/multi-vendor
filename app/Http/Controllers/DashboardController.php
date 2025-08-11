@@ -35,13 +35,5 @@ class DashboardController extends Controller
 
     }
 
-    public function vendors()
-    {
-        $products = Product::count();
-        $vendors = Vendor::with('user')->get();
 
-        return view('admin.adminVendors', compact('products', 'vendors'));
-
-
-    }
 }

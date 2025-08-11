@@ -152,49 +152,68 @@ class CartService
      * Update quantity (handles both guest & auth)
      */
     public function updateQuantity($identifier, int $quantity)
-    {
-        if ($quantity < 1) {
-            throw new \InvalidArgumentException('Quantity must be at least 1.');
-        }
-
-        if (!Auth::check()) {
-            // Here $identifier is product_id for session mode
-            $cart = session()->get('cart', []);
-            foreach ($cart as &$item) {
-                if ($item['product_id'] == $identifier) {
-                    $product = Product::findOrFail($identifier);
-                    if ($quantity > $product->stock) {
-                        throw new \RuntimeException('Quantity exceeds stock.');
-                    }
-                    $item['quantity'] = $quantity;
-                    break;
-                }
-            }
-            session()->put('cart', $cart);
-            return;
-        }
-
-        // Auth → $identifier treated as cart_item id
-        $cartItem = CartItem::findOrFail($identifier);
-        $product = $cartItem->product;
-        if ($quantity > $product->stock) {
-            throw new \RuntimeException('Quantity exceeds stock.');
-        }
-        $cartItem->update(['quantity' => $quantity]);
+{
+    if ($quantity < 1) {
+        throw new \InvalidArgumentException('Quantity must be at least 1.');
     }
+
+    if (!Auth::check()) {
+        // Guest cart
+        $cart = session()->get('cart', []);
+        foreach ($cart as &$item) {
+            if ($item['product_id'] == $identifier) {
+                $product = Product::findOrFail($identifier);
+                if ($quantity > $product->stock) {
+                    throw new \RuntimeException('Quantity exceeds stock.');
+                }
+                $item['quantity'] = $quantity;
+                break;
+            }
+        }
+        session()->put('cart', $cart);
+        return;
+    }
+
+    // Logged-in cart
+    $cartItem = CartItem::findOrFail($identifier);
+    $product = $cartItem->product;
+
+    if ($quantity > $product->stock) {
+        throw new \RuntimeException('Quantity exceeds stock.');
+    }
+
+    // Agar order placed ho chuka hai aur quantity kam kar rahe hain → rollback stock
+    if ($cartItem->order_id && $quantity < $cartItem->quantity) {
+        $diff = $cartItem->quantity - $quantity;
+        $product->increment('stock', $diff);
+    }
+
+    // Agar quantity badha rahe hain → pehle stock check kare
+    $cartItem->update(['quantity' => $quantity]);
+}
+
 
     /**
      * Remove item (product_id for guest, cart_item id for auth)
      */
     public function removeItem($identifier)
-    {
-        if (!Auth::check()) {
-            $cart = session()->get('cart', []);
-            $cart = collect($cart)->reject(fn($it) => $it['product_id'] == $identifier)->values()->all();
-            session()->put('cart', $cart);
-            return;
-        }
-
-        CartItem::where('id', $identifier)->delete();
+{
+    if (!Auth::check()) {
+        // Guest user - sirf session se remove
+        $cart = session()->get('cart', []);
+        $cart = collect($cart)->reject(fn($it) => $it['product_id'] == $identifier)->values()->all();
+        session()->put('cart', $cart);
+        return;
     }
+
+    $cartItem = CartItem::findOrFail($identifier);
+
+    if ($cartItem->order_id) {
+        $product = $cartItem->product;
+        $product->increment('stock', $cartItem->quantity);
+    }
+
+    $cartItem->delete();
+}
+
 }

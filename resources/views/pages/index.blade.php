@@ -3,22 +3,30 @@
 @section('title', 'Home ')
 
 @section('content')
+
+<section class="hero">
+        <div class="hero-image">
+        <img src="{{ asset('images/banner1.png') }}" alt="Hero Image">
+    </div>
+    <div class="hero-content">
+        <h1>Imagine it. Design it. <br> Bring it to life in 3D.</h1>
+    </div>
+     </section>
     <!-- Products Grid -->
     {{-- dd($products) --}}
     <div class="products" id="product-list">
     @foreach ($products as $product)
-        <div class="product">
-            <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" />
-            <h3>{{ $product->name }}</h3>
-            <p>₹{{ number_format($product->price, 2) }}</p>
-            <button
-                class="add-to-cart-btn"
-                data-id="{{ $product->id }}"
-                data-name="{{ $product->name }}"
-                data-price="{{ $product->price }}"
-            >
+        <div class="product" style="display: flex; flex-direction: column; justify-content: space-between; height: 100%;">
+            <div>
+                <img src="{{ asset('storage/'.$product->image) }}" alt="{{ $product->name }}" />
+                <h4>{{ $product->name }}</h3>
+                <p>₹{{ number_format($product->price, 2) }}</p>
+            </div>
+            <div>
+            <button class="add-to-cart-btn" data-id="{{ $product->id }}" data-name="{{ $product->name }}" data-price="{{ $product->price }}" style="margin-top: auto;">
                 Add to Cart
             </button>
+            </div>
         </div>
     @endforeach
 </div>
