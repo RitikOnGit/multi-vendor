@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Product;
 use App\Models\Vendor;
+use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
@@ -18,13 +19,22 @@ class DashboardController extends Controller
             $products = Product::count();
             $vendors = Vendor::count();
         } elseif ($user->role === 'vendor') {
+            $vendorId = $user->vendorProfile->id;
             $users = null;
-            $products = Product::where('vendor_id', $user->id)->count();
+            $products = Product::where('vendor_id', $vendorId)->count();
+
+            $orderCount = OrderItem::where('vendor_id', $vendorId)
+            ->distinct('order_id')
+            ->count('order_id');
+
+
+            // dd($orderCount);
             $vendors = null;
+            return view('admin.dashboard', compact('users', 'products', 'orderCount'));
         } else {
             return redirect('/');
         }
-
         return view('admin.dashboard', compact('users', 'products', 'vendors'));
+
     }
 }
