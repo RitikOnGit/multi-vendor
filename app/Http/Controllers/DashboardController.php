@@ -27,14 +27,21 @@ class DashboardController extends Controller
             ->distinct('order_id')
             ->count('order_id');
 
-
-            // dd($orderCount);
-            $vendors = null;
             return view('admin.dashboard', compact('users', 'products', 'orderCount'));
         } else {
             return redirect('/');
         }
         return view('admin.dashboard', compact('users', 'products', 'vendors'));
+
+    }
+
+    public function vendors()
+    {
+        $products = Product::count();
+        $vendors = Vendor::with('user')->get();
+
+        return view('admin.adminVendors', compact('products', 'vendors'));
+
 
     }
 }

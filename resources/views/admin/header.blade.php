@@ -25,19 +25,19 @@
                                 <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
                                 <polyline points="9 22 9 12 15 12 15 22"></polyline>
                             </svg>
-                            <span class="ml-4">Dashboards</span>
+                            <span class="ml-4">@yield('title', 'Dashboard')</span>
                         </a>
                     </li>
                     @if(Auth::user() && Auth::user()->role === 'admin')
-                        <li class="">
-                            <a href="{{-- page-employee.html --}}" class="svg-icon">
+                        <li class="{{ request()->routeIs('admin.vendors') ? 'active' : '' }}">
+                            <a href="{{ route('admin.vendors') }}" class="svg-icon">
                                 <svg class="svg-icon" width="25" height="25" xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                                     <circle cx="12" cy="7" r="4"></circle>
                                 </svg>
-                                <span class="ml-4">Sellers</span>
+                                <span class="ml-4">Vendors</span>
                             </a>
                         </li>
 
