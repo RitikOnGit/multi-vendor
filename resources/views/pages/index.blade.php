@@ -34,6 +34,7 @@
         </div>
         <div class="cart-button">
             <button onclick="window.location.href='{{ route('cart.index') }}'">View cart</button>
+            <button onclick="window.location.href='{{ route('myOrders') }}'">My orders</button>
         </div>
     </div>
 @endsection
