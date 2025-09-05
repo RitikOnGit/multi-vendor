@@ -58,7 +58,7 @@ class CheckoutController extends Controller
             'razorpayOrderId' => $razorpayOrder['id'],
             'amount' => $totalAmount,
             'orders' => $orders,
-            'order' => $order,               // <<< add this
+            'order' => $order,
             'razorpayKey' => env('RAZORPAY_KEY'),
         ]);
 }
